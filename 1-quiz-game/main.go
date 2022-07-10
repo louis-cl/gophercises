@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 type problem struct {
@@ -23,17 +24,17 @@ func createProblemList(data [][]string) []problem {
 }
 
 func play(problems []problem, timeLimitS int) {
-	fmt.Printf("Answer each question in less than %d seconds.\nPress Enter to start !", timeLimitS)
+	fmt.Printf("Answer all questions in less than %d seconds.\nPress Enter to start !", timeLimitS)
 	fmt.Scanln()
 
 	scanner := bufio.NewScanner(os.Stdin)
 
 	correctAnswers := 0
-	// timer_duration := time.Duration(timeLimitS) * time.Second
-	// timer := time.NewTimer(timer_duration)
 
+	timer := time.NewTimer(time.Duration(timeLimitS) * time.Second)
 	answerCh := make(chan string)
 
+out:
 	for i, prob := range problems {
 		fmt.Printf("Problem #%d: %s = ", i+1, prob.question)
 		go func() {
@@ -41,12 +42,14 @@ func play(problems []problem, timeLimitS int) {
 			answerCh <- scanner.Text()
 		}()
 		select {
+		case <-timer.C:
+			fmt.Println("\nYou ran out of time !")
+			break out
 		case answer := <-answerCh:
 			if answer == prob.answer {
 				correctAnswers++
 			}
 		}
-		// timer.Reset(timer_duration)
 	}
 	fmt.Printf("You scored %d out of %d", correctAnswers, len(problems))
 }
