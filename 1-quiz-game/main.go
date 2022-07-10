@@ -29,13 +29,24 @@ func play(problems []problem, timeLimitS int) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	correctAnswers := 0
+	// timer_duration := time.Duration(timeLimitS) * time.Second
+	// timer := time.NewTimer(timer_duration)
+
+	answerCh := make(chan string)
+
 	for i, prob := range problems {
 		fmt.Printf("Problem #%d: %s = ", i+1, prob.question)
-		scanner.Scan()
-		answer := scanner.Text()
-		if answer == prob.answer {
-			correctAnswers++
+		go func() {
+			scanner.Scan()
+			answerCh <- scanner.Text()
+		}()
+		select {
+		case answer := <-answerCh:
+			if answer == prob.answer {
+				correctAnswers++
+			}
 		}
+		// timer.Reset(timer_duration)
 	}
 	fmt.Printf("You scored %d out of %d", correctAnswers, len(problems))
 }
