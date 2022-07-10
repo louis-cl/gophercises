@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -39,7 +41,7 @@ out:
 		fmt.Printf("Problem #%d: %s = ", i+1, prob.question)
 		go func() {
 			scanner.Scan()
-			answerCh <- scanner.Text()
+			answerCh <- strings.ToLower(strings.TrimSpace(scanner.Text()))
 		}()
 		select {
 		case <-timer.C:
@@ -58,6 +60,7 @@ func main() {
 	var (
 		csvFile   = flag.String("csv", "problems.csv", "a csv file in the format of question,answer")
 		timeLimit = flag.Int("limit", 30, "the time limit for the quiz in seconds")
+		shuffle   = flag.Bool("shuffle", false, "set to shuffle questions randomly")
 	)
 	flag.Parse()
 	// read file
@@ -74,5 +77,9 @@ func main() {
 	}
 	// convert data to problems
 	problems := createProblemList(data)
+	if *shuffle {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(problems), func(i, j int) { problems[i], problems[j] = problems[j], problems[i] })
+	}
 	play(problems, *timeLimit)
 }
