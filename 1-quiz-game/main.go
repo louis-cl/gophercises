@@ -22,8 +22,12 @@ func createProblemList(data [][]string) []problem {
 	return problems
 }
 
-func play(problems []problem) {
+func play(problems []problem, timeLimitS int) {
+	fmt.Printf("Answer each question in less than %d seconds.\nPress Enter to start !", timeLimitS)
+	fmt.Scanln()
+
 	scanner := bufio.NewScanner(os.Stdin)
+
 	correctAnswers := 0
 	for i, prob := range problems {
 		fmt.Printf("Problem #%d: %s = ", i+1, prob.question)
@@ -38,8 +42,8 @@ func play(problems []problem) {
 
 func main() {
 	var (
-		csvFile = flag.String("csv", "problems.csv", "a csv file in the format of question,answer")
-		// timeLimit = flag.Int("limit", 30, "the time limit for the quiz in seconds")
+		csvFile   = flag.String("csv", "problems.csv", "a csv file in the format of question,answer")
+		timeLimit = flag.Int("limit", 30, "the time limit for the quiz in seconds")
 	)
 	flag.Parse()
 	// read file
@@ -56,5 +60,5 @@ func main() {
 	}
 	// convert data to problems
 	problems := createProblemList(data)
-	play(problems)
+	play(problems, *timeLimit)
 }
