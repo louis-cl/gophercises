@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	bolt "go.etcd.io/bbolt"
 	"gopkg.in/yaml.v3"
 )
 
@@ -98,4 +99,25 @@ func parseJson(js []byte) ([]entry, error) {
 		return nil, err
 	}
 	return entries, nil
+}
+
+// BoldDBHandler will open the BoltDB pointed by the provided path
+// and return an http.HandlerFunc (which also implements http.Handler)
+// that will attempt to map any paths to their corresponding URL.
+//  If the path doesn't exist in the DB, then the fallback http.Handler
+// will be called instead.
+//
+// DB is expected to have as paths as key and the url to redirect as value
+func BoltDBHandler(db *bolt.DB, fallback http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte("routes"))
+			if nextUrl := b.Get([]byte(r.RequestURI)); nextUrl != nil {
+				http.Redirect(w, r, string(nextUrl), http.StatusMovedPermanently)
+			} else {
+				fallback.ServeHTTP(w, r)
+			}
+			return nil
+		})
+	}
 }

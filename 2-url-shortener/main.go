@@ -3,9 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"urlshort/handler"
+
+	bolt "go.etcd.io/bbolt"
 )
 
 func main() {
@@ -30,7 +33,6 @@ func main() {
 	}
 
 	// Build the JSONHandler using YAMLHandler as the fallback
-
 	jsonConfig := []byte(`
 	[{
 		"path": "/json",
@@ -45,8 +47,25 @@ func main() {
 		panic(err)
 	}
 
+	// Build a BoltDBHandler
+	db, err := bolt.Open("routes.db", fs.ModeExclusive, nil)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	// add entry in DB
+	db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("routes"))
+		if err != nil {
+			return err
+		}
+		b.Put([]byte("/bolt"), []byte("https://www.progville.com/go/bolt-embedded-db-golang/"))
+		return nil
+	})
+	boltDBHandler := handler.BoltDBHandler(db, jsonHandler)
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", jsonHandler)
+	http.ListenAndServe(":8080", boltDBHandler)
 }
 
 func readOrDefault(filePath string) []byte {
