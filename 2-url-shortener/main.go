@@ -28,8 +28,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Build the JSONHandler using YAMLHandler as the fallback
+
+	jsonConfig := []byte(`
+	[{
+		"path": "/json",
+		"url": "https://jsoneditoronline.org/"
+	},
+		{
+		"path": "/yaml",
+		"url": "https://codebeautify.org/yaml-editor-online"
+	}]`)
+	jsonHandler, err := handler.JSONHandler(jsonConfig, yamlHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", jsonHandler)
 }
 
 func readOrDefault(filePath string) []byte {
