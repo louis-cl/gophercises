@@ -16,8 +16,7 @@ import (
 // http.Handler will be called instead.
 func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		nextUrl, present := pathsToUrls[r.RequestURI]
-		if present {
+		if nextUrl, present := pathsToUrls[r.URL.Path]; present {
 			http.Redirect(w, r, nextUrl, http.StatusMovedPermanently)
 		} else {
 			fallback.ServeHTTP(w, r)
@@ -112,7 +111,7 @@ func BoltDBHandler(db *bolt.DB, fallback http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db.View(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte("routes"))
-			if nextUrl := b.Get([]byte(r.RequestURI)); nextUrl != nil {
+			if nextUrl := b.Get([]byte(r.URL.Path)); nextUrl != nil {
 				http.Redirect(w, r, string(nextUrl), http.StatusMovedPermanently)
 			} else {
 				fallback.ServeHTTP(w, r)
