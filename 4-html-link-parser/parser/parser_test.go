@@ -14,7 +14,7 @@ func TestTable(t *testing.T) {
 		want []Link
 	}{
 		{
-			"simple",
+			"simple 1 link",
 			`
 <html>
 <body>
@@ -25,6 +25,32 @@ func TestTable(t *testing.T) {
 			`,
 			[]Link{
 				{Href: "/other-page", Text: "A link to another page"},
+			},
+		},
+		{
+			"2 links with nested elements",
+			`
+<html>
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+	<h1>Social stuffs</h1>
+	<div>
+	<a href="https://www.twitter.com/joncalhoun">
+		Check me out on twitter
+		<i class="fa fa-twitter" aria-hidden="true"></i>
+	</a>
+	<a href="https://github.com/gophercises">
+		Gophercises is on <strong>Github</strong>!
+	</a>
+	</div>
+</body>
+</html>
+			`,
+			[]Link{
+				{Href: "https://www.twitter.com/joncalhoun", Text: "Check me out on twitter"},
+				{Href: "https://github.com/gophercises", Text: "Gophercises is on Github!"},
 			},
 		},
 	}

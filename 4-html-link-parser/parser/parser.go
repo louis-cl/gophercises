@@ -55,5 +55,5 @@ func linkInNode(a *html.Node) Link {
 		}
 	}
 	f(a)
-	return Link{Href: href, Text: sb.String()}
+	return Link{Href: href, Text: strings.TrimSpace(sb.String())}
 }
