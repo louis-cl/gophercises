@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -17,15 +18,33 @@ func main() {
 		panic(err)
 	}
 
-	intro := story["intro"]
 	templ := buildTemplate()
 
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
-		templ.Execute(w, intro)
+		arc, err := arcFromPath(r.URL.Path)
+		if err != nil {
+			w.WriteHeader(400)
+		}
+		if arcStory, in := story[arc]; in {
+			templ.Execute(w, arcStory)
+			return
+		} else {
+			w.WriteHeader(404)
+		}
 	}
 
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", handler)
+}
+
+func arcFromPath(path string) (string, error) {
+	if path == "/" {
+		return "intro", nil
+	}
+	if path[0] != '/' {
+		return "", fmt.Errorf("invalid path %v", path)
+	}
+	return path[1:], nil
 }
 
 type storyArc struct {
@@ -48,6 +67,9 @@ func readStory() (allArcs, error) {
 	arcs := make(map[string]storyArc)
 	if err := json.Unmarshal(bytes, &arcs); err != nil {
 		return nil, err
+	}
+	if _, ok := arcs["intro"]; !ok {
+		return nil, errors.New("no intro arc in given json")
 	}
 	return arcs, nil
 }
