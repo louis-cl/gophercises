@@ -23,13 +23,13 @@ func main() {
 	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		arc, err := arcFromPath(r.URL.Path)
 		if err != nil {
-			w.WriteHeader(400)
+			http.Error(w, "Invalid chapter", http.StatusBadRequest)
 		}
 		if arcStory, in := story[arc]; in {
 			templ.Execute(w, arcStory)
 			return
 		} else {
-			w.WriteHeader(404)
+			http.Error(w, "Chapter not found", http.StatusNotFound)
 		}
 	}
 
@@ -39,7 +39,7 @@ func main() {
 
 // arcFromPath extracts which arc should be returned to a requested path
 func arcFromPath(path string) (string, error) {
-	if path == "/" {
+	if path == "/" || path == "" {
 		return "intro", nil
 	}
 	if path[0] != '/' {
