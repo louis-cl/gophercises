@@ -7,24 +7,37 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func TestSimpleHtml(t *testing.T) {
-	html := `
+func TestTable(t *testing.T) {
+	var tests = []struct {
+		name string
+		html string
+		want []Link
+	}{
+		{
+			"simple",
+			`
 <html>
 <body>
 	<h1>Hello!</h1>
 	<a href="/other-page">A link to another page</a>
 </body>
-</html>	
-	`
+</html>
+			`,
+			[]Link{
+				{Href: "/other-page", Text: "A link to another page"},
+			},
+		},
+	}
 
-	ans, err := AllLinksInHTML(strings.NewReader(html))
-	if err != nil {
-		t.Error("Got error", err)
-	}
-	expected := []Link{
-		{Href: "/other-page", Text: "A link to another page"},
-	}
-	if !slices.Equal(ans, expected) {
-		t.Errorf("got %v, want %v", ans, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ans, err := AllLinksInHTML(strings.NewReader(tt.html))
+			if err != nil {
+				t.Error("Got error", err)
+			}
+			if !slices.Equal(ans, tt.want) {
+				t.Errorf("got %v, want %v", ans, tt.want)
+			}
+		})
 	}
 }
