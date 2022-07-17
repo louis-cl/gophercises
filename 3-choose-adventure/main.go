@@ -37,6 +37,7 @@ func main() {
 	http.ListenAndServe(":8080", handler)
 }
 
+// arcFromPath extracts which arc should be returned to a requested path
 func arcFromPath(path string) (string, error) {
 	if path == "/" {
 		return "intro", nil
@@ -56,9 +57,9 @@ type storyArc struct {
 	} `json:"options"`
 }
 
-type allArcs map[string]storyArc
-
-func readStory() (allArcs, error) {
+// readStory reads all arcs from storyJsonPath
+// guaranteed to have one intro arc
+func readStory() (map[string]storyArc, error) {
 	bytes, err := os.ReadFile(storyJsonPath)
 	if err != nil {
 		return nil, err
