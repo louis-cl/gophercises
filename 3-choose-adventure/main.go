@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"net/http"
 	"os"
 )
 
@@ -17,7 +19,13 @@ func main() {
 
 	intro := story["intro"]
 	templ := buildTemplate()
-	templ.Execute(os.Stdout, intro)
+
+	var handler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {
+		templ.Execute(w, intro)
+	}
+
+	fmt.Println("Starting the server on :8080")
+	http.ListenAndServe(":8080", handler)
 }
 
 type storyArc struct {
