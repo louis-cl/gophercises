@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	f, err := os.Open("./examples/ex1.html")
+	f, err := os.Open("./examples/ex3.html")
 	if err != nil {
 		panic(err)
 	}

@@ -53,6 +53,19 @@ func TestTable(t *testing.T) {
 				{Href: "https://github.com/gophercises", Text: "Gophercises is on Github!"},
 			},
 		},
+		{
+			"comment inside link",
+			`
+<html>
+<body>
+	<a href="/dog-cat">dog cat <!-- commented text SHOULD NOT be included! --></a>
+</body>
+</html>
+			`,
+			[]Link{
+				{Href: "/dog-cat", Text: "dog cat"},
+			},
+		},
 	}
 
 	for _, tt := range tests {
