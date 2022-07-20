@@ -5,13 +5,13 @@ import (
 	"flag"
 	"io"
 	"os"
-	"sitemap/scraper"
+	"sitemap/scrapper"
 )
 
 func main() {
 	var domain = flag.String("domain", "example.com", "domain to build a sitemap for")
 	flag.Parse()
-	res := scraper.AllLinks(*domain)
+	res := scrapper.AllLinks(*domain)
 	writeXml(os.Stdout, res)
 }
 
