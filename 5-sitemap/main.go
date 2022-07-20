@@ -33,7 +33,6 @@ func main() {
 		toProcess.Remove(toProcess.Front())
 		processed[item] = true
 		for _, link := range links {
-			log.Println("found link", link)
 			if _, in := processed[link]; !in && isLinkInDomain(link, *domain) {
 				processed[link] = false
 				toProcess.PushBack(link)
@@ -41,7 +40,7 @@ func main() {
 		}
 	}
 
-	for link, _ := range processed {
+	for link := range processed {
 		fmt.Printf("%v", link)
 	}
 }
