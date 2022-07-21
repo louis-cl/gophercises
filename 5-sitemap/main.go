@@ -10,8 +10,9 @@ import (
 
 func main() {
 	var domain = flag.String("domain", "example.com", "domain to build a sitemap for")
+	var depth = flag.Int("depth", 10, "max successive links to follow")
 	flag.Parse()
-	res := scrapper.AllLinks(*domain)
+	res := scrapper.AllLinks(*domain, *depth)
 	writeXml(os.Stdout, res)
 }
 

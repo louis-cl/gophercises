@@ -10,23 +10,35 @@ import (
 	"strings"
 )
 
-func AllLinks(domain string) []string {
+const depthToken string = "$"
+
+func AllLinks(domain string, maxDepth int) []string {
 	startingUrl := fmt.Sprintf("http://%s", domain)
 
 	toProcess := list.New()
 	processed := make(map[string]bool)
 
 	toProcess.PushBack(startingUrl)
+	toProcess.PushBack("$")
 	processed[startingUrl] = false
 
-	for toProcess.Len() > 0 {
+	currentDepth := 0
+
+	// token is after all elements of depth currentDepth
+	for toProcess.Len() > 0 && currentDepth < maxDepth {
 		item := toProcess.Front().Value.(string)
+		toProcess.Remove(toProcess.Front())
+		if item == depthToken {
+			fmt.Println("reached depth", currentDepth)
+			currentDepth++
+			toProcess.PushBack(depthToken)
+			continue
+		}
 		links, err := linksIn(item)
+		// fmt.Println("got links for", item, links)
 		if err != nil {
 			log.Println("couldn't get links for", item, err)
 		}
-
-		toProcess.Remove(toProcess.Front())
 		processed[item] = true
 		for _, link := range links {
 			if _, in := processed[link]; !in && isLinkInDomain(link, domain) {
